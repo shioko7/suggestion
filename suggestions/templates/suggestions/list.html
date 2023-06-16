@@ -1,0 +1,13 @@
+{% extends 'suggestions/base.html' %}
+
+{% block content %}
+    <h1>提案一覧</h1>
+    {% for suggestion in suggestions %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="card-text">{{ suggestion.content }}</p>
+                <p class="card-text">{{ suggestion.created_at }}</p>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

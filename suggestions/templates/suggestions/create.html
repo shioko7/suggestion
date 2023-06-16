@@ -1,0 +1,28 @@
+{% extends 'suggestions/base.html' %}
+
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <h2 class="mb-4">投稿作成</h2>
+      <form method="post" action="{% url 'suggestion_create' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="content" class="form-label">提案内容</label>
+          <textarea class="form-control" id="content" name="content" rows="5"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="category" class="form-label">カテゴリー</label>
+          <select class="form-select" id="category" name="category">
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">提案する</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
