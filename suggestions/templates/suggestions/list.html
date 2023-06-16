@@ -1,13 +1,22 @@
 {% extends 'suggestions/base.html' %}
 
 {% block content %}
-    <h1>提案一覧</h1>
-    {% for suggestion in suggestions %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <p class="card-text">{{ suggestion.content }}</p>
-                <p class="card-text">{{ suggestion.created_at }}</p>
+    <h1 class="mb-4">提案一覧</h1>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for suggestion in suggestions %}
+            <div class="col">
+                <a href="{% url 'suggestion_detail' suggestion.id %}" class="text-decoration-none text-dark">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ suggestion.category }}</h5>
+                            <p class="card-text">{{ suggestion.content|truncatewords:20 }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">{{ suggestion.created_at }}</small>
+                        </div>
+                    </div>
+                </a>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 {% endblock %}

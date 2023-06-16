@@ -1,0 +1,8 @@
+{% extends 'suggestions/base.html' %}
+
+{% block content %}
+    <h1>{{ suggestion.category }}</h1>
+    <p>{{ suggestion.content }}</p>
+    <p><small>投稿日: {{ suggestion.created_at }}</small></p>
+    <a href="{% url 'suggestion_list' %}">戻る</a>
+{% endblock %}
