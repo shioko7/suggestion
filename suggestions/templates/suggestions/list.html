@@ -1,18 +1,38 @@
 {% extends 'suggestions/base.html' %}
 
+{% block head_extra %}
+<style>
+    .factory { background-color: rgba(227, 74, 74, 0.3); }  /* 工場への提案 */
+    .administration { background-color: rgba(118, 227, 111, 0.3); }  /* 一般管理部門への提案 */
+    .regulations { background-color: rgba(74, 111, 227, 0.3); }  /* 規則への提案 */
+    .technology { background-color: rgba(227, 74, 227, 0.3); }  /* 技術本部への提案 */
+    .sales { background-color: rgba(74, 227, 227, 0.3); }  /* 営業への提案 */
+
+    .card-body {
+        height: 140px;  /* カードボディの高さを300pxに固定 */
+    }
+
+    .card-title {
+        white-space: nowrap;  /* 折り返しなし */
+        overflow: hidden;  /* 領域外は非表示 */
+        text-overflow: ellipsis;  /* 文字が領域を超えた場合は...を表示 */
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <h1 class="mb-4">提案一覧</h1>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-4 g-6">
         {% for suggestion in suggestions %}
             <div class="col">
                 <a href="{% url 'suggestion_detail' suggestion.id %}" class="text-decoration-none text-dark">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title">{{ suggestion.category }}</h5>
-                            <p class="card-text">{{ suggestion.content|truncatewords:20 }}</p>
+                            <h5 class="card-title">{{ suggestion.content }}</h5>
                         </div>
-                        <div class="card-footer">
+                        <div class="card-footer {{ suggestion.category.name }}">
                             <small class="text-muted">{{ suggestion.created_at }}</small>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ suggestion.category }}</h6>
                         </div>
                     </div>
                 </a>

@@ -10,10 +10,14 @@ class Category(models.Model):
     )
     name = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
 
+    @property
+    def classname(self):
+        return self.name
+
     def __str__(self):
         return self.get_name_display()
 
-        
+
 class Suggestion(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
