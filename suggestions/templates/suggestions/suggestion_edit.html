@@ -1,0 +1,10 @@
+{% extends 'suggestions/base.html' %}
+
+{% block content %}
+    <h1>提案を編集</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">保存</button>
+    </form>
+{% endblock %}

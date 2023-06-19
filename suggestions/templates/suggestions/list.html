@@ -20,23 +20,63 @@
 </style>
 {% endblock %}
 
+
 {% block content %}
     <h1 class="mb-4">提案一覧</h1>
     <div class="row row-cols-1 row-cols-md-4 g-6">
         {% for suggestion in suggestions %}
             <div class="col">
-                <a href="{% url 'suggestion_detail' suggestion.id %}" class="text-decoration-none text-dark">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ suggestion.content }}</h5>
-                        </div>
-                        <div class="card-footer {{ suggestion.category.name }}">
-                            <small class="text-muted">{{ suggestion.created_at }}</small>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ suggestion.category }}</h6>
-                        </div>
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'suggestion_detail' suggestion.id %}" class="text-decoration-none text-dark">
+                                {{ suggestion.content }}
+
+                        </h5>
                     </div>
-                </a>
+                    <div class="card-footer {{ suggestion.category.name }}">
+                        <small class="text-muted">{{ suggestion.created_at }}</small>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ suggestion.category }}</h6>
+                        </a>
+
+                        <button type="button" class="like-button" data-suggestion-id="{{ suggestion.id }}" style="border:none;background:none">
+                          <i class="fa-heart {% if user in suggestion.likes.all %}fas text-danger{% else %}far{% endif %}" id="icon-{{ suggestion.id }}" style="opacity: 0.8;"></i>
+      <span id="like_count-{{ suggestion.id }}">{{ suggestion.like_set.count }} </span>
+                        </button>
+                    </div>
+                </div>
             </div>
         {% endfor %}
     </div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $('.like-button').on('click', function () {
+      var button = $(this);
+      var suggestionId = button.data('suggestion-id');
+      var icon = $('#icon-' + suggestionId);
+      var counter = $('#like_count-' + suggestionId);
+      $.ajax({
+          url: '{% url "like_suggestion" %}',
+          method: 'POST',
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              post_pk: suggestionId,
+          },
+          success: function (data) {
+              counter.text(data.like_count);
+              if (data.method == 'create'){
+                  icon.removeClass('far');
+                  icon.addClass('fas text-danger');
+              } else {
+                  icon.removeClass('fas text-danger');
+                  icon.addClass('far');
+              }
+          }
+      });
+  });
+
+</script>
 {% endblock %}

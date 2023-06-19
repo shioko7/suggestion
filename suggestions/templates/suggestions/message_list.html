@@ -1,0 +1,14 @@
+{% extends 'suggestions/base.html' %}
+
+{% block content %}
+    <h2>Messages</h2>
+    {% for message in messages %}
+        <div>
+            <p>From: {{ message.sender.username }}</p>
+            <p>{{ message.content }}</p>
+            <p>Sent at: {{ message.created_at }}</p>
+        </div>
+    {% empty %}
+        <p>No messages.</p>
+    {% endfor %}
+{% endblock %}

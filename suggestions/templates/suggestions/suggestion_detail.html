@@ -5,4 +5,9 @@
     <p>{{ suggestion.content }}</p>
     <p><small>投稿日: {{ suggestion.created_at }}</small></p>
     <a href="{% url 'suggestion_list' %}">戻る</a>
+    {% if user == suggestion.user %}
+    <a href="{% url 'suggestion_edit' suggestion.id %}">編集</a>
+    <a href="{% url 'suggestion_delete' suggestion.id %}">削除</a>
+    {% endif %}
+
 {% endblock %}
