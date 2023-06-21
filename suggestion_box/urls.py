@@ -3,6 +3,7 @@ from suggestions import views
 from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
 
+
 urlpatterns = [
     path('login/', LoginView.as_view(template_name='suggestions/login.html'), name='login'),
     path('', views.index, name='index'),
@@ -18,8 +19,6 @@ urlpatterns = [
     path('messages/', views.message_list, name='message_list'),
     path('messages/new/<int:recipient_id>/', views.message_create, name='message_create'),
     path('like_suggestion/', views.like_suggestion, name='like_suggestion'),  # like_suggestionビューへのURLを追加
-
-
-
-
-]
+    path('messages/thread/<int:sender_id>/<int:recipient_id>/', views.message_thread, name='message_thread'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    ]

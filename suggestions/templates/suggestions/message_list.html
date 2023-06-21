@@ -2,11 +2,19 @@
 
 {% block content %}
     <h2>Messages</h2>
+
+    <!-- 追加：メッセージ送信フォーム -->
+    <form method="POST" action="{% url 'message_create' recipient_id %}">
+        {% csrf_token %}
+        <textarea name="message" placeholder="Type your message here..." required></textarea>
+        <button type="submit">Send</button>
+    </form>
+
     {% for message in messages %}
-        <div>
-            <p>From: {{ message.sender.username }}</p>
+        <div style="border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; border-radius: 5px;">
+            <p><strong>{{ message.sender.username }}</strong></p>
             <p>{{ message.content }}</p>
-            <p>Sent at: {{ message.created_at }}</p>
+            <p style="font-size: 0.8em; color: #888;">Sent at: {{ message.created_at }}</p>
         </div>
     {% empty %}
         <p>No messages.</p>

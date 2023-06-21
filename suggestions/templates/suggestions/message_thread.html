@@ -1,0 +1,15 @@
+{% extends 'suggestions/base.html' %}
+
+{% block content %}
+{% for message in messages %}
+  <p>{{ message.sender.username }} to {{ message.recipient.username }} at {{ message.created_at }}:</p>
+  <p>{{ message.content }}</p>
+{% endfor %}
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Send</button>
+</form>
+
+{% endblock %}

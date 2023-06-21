@@ -4,9 +4,8 @@ from .forms import SuggestionForm, UserProfileForm, MessageForm # UserProfileFor
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse  # JsonResponseを追加
 from django.views.decorators.http import require_POST  # require_POSTを追加
-
-
-
+from django.contrib.auth.models import User  # Userモデルのインポートを追加
+from django.db.models import Q
 
 
 def index(request):
@@ -111,25 +110,25 @@ def edit_profile(request):
     return render(request, 'suggestions/edit_profile.html', {'form': form})
 
 @login_required
-def message_create(request, receiver_id):
-    receiver = get_object_or_404(User, id=receiver_id)
+def message_create(request, recipient_id):
+    recipient = get_object_or_404(User, id=recipient_id)
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
             message = form.save(commit=False)
             message.sender = request.user
-            message.receiver = receiver
+            message.recipient = recipient
             message.save()
             return redirect('message_list')
     else:
         form = MessageForm()
-    return render(request, 'suggestions/message_form.html', {'form': form, 'receiver': receiver})
-
+    return render(request, 'suggestions/message_create.html', {'form': form, 'recipient': recipient})
 
 @login_required
 def message_list(request):
     messages = Message.objects.filter(recipient=request.user)
-    return render(request, 'suggestions/message_list.html', {'messages': messages})
+    recipient_id = request.user.id
+    return render(request, 'suggestions/message_list.html', {'messages': messages, 'recipient_id': recipient_id})
 
 @login_required
 def message_detail(request, message_id):
@@ -140,3 +139,25 @@ def message_detail(request, message_id):
         message.is_read = True
         message.save()
     return render(request, 'suggestions/message_detail.html', {'message': message})
+
+
+
+@login_required
+def message_thread(request, sender_id, recipient_id):
+    sender = get_object_or_404(User, id=sender_id)
+    recipient = get_object_or_404(User, id=recipient_id)
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = sender
+            message.recipient = recipient
+            message.save()
+    else:
+        form = MessageForm()
+    messages = Message.objects.filter(Q(sender=sender, recipient=recipient) | Q(sender=recipient, recipient=sender))
+    return render(request, 'suggestions/message_thread.html', {'form': form, 'messages': messages})
+
+@login_required
+def dashboard(request):
+    return render(request, 'suggestions/dashboard.html')
