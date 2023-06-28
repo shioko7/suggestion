@@ -2,7 +2,8 @@ from django.urls import path
 from suggestions import views
 from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('login/', LoginView.as_view(template_name='suggestions/login.html'), name='login'),
@@ -21,4 +22,12 @@ urlpatterns = [
     path('like_suggestion/', views.like_suggestion, name='like_suggestion'),  # like_suggestionビューへのURLを追加
     path('messages/thread/<int:sender_id>/<int:recipient_id>/', views.message_thread, name='message_thread'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('get-monthly-proposals/', views.get_monthly_proposals, name='get_monthly_proposals'),
+    path('fetch-data', views.FetchData.as_view(), name='fetch_data'),
+    path('get-weekly-proposals/', views.get_weekly_proposals, name='get_weekly_proposals'),
+
+
     ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

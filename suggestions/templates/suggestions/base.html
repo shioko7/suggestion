@@ -1,3 +1,5 @@
+  {% load static %}
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,25 +8,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css">
     <title>Suggestion Box</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% block head_extra %}{% endblock %}
 </head>
 <body>
+
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'dashboard' %}">Dashboard</a>
-  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+      <a class="navbar-brand" href="{% url 'dashboard' %}">Dashboard</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
-
               <li class="nav-item">
                   <a class="nav-link" href="{% url 'suggestion_list' %}">提案一覧</a>
               </li>
               <li class="nav-item">
                   <a class="nav-link" href="{% url 'suggestion_create' %}">提案作成</a>
               </li>
-
               {% if user.is_authenticated %}
               <li class="nav-item">
                   <a class="nav-link" href="{% url 'message_list' %}">メッセージ</a>
@@ -33,8 +35,17 @@
                   <a class="nav-link" href="{% url 'logout' %}">ログアウト</a>
               </li>
               {% endif %}
-
           </ul>
+
+          {% if user.is_authenticated %}
+          <!-- User Info -->
+          <div class="d-flex align-items-center ms-auto">
+              <a href="{% url 'dashboard' %}" class="nav-link px-2 text-white">
+                <img class="rounded-circle mr-2" src="{% if request.user.profile.profile_picture %}{{ request.user.profile.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" alt="{{ request.user.username }}" style="width: 40px; height: 40px;">
+                <span>{{ request.user.username }}</span>
+              </a>
+          </div>
+          {% endif %}
       </div>
   </nav>
 

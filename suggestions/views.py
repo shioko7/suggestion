@@ -6,6 +6,13 @@ from django.http import JsonResponse  # JsonResponseを追加
 from django.views.decorators.http import require_POST  # require_POSTを追加
 from django.contrib.auth.models import User  # Userモデルのインポートを追加
 from django.db.models import Q
+from django.db.models import Count
+from django.db.models.functions import TruncDay,TruncMonth
+from datetime import datetime
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views import View
+from django.db.models.functions import TruncWeek
 
 
 def index(request):
@@ -160,4 +167,76 @@ def message_thread(request, sender_id, recipient_id):
 
 @login_required
 def dashboard(request):
-    return render(request, 'suggestions/dashboard.html')
+    total_proposals = Suggestion.objects.filter(user=request.user).count()
+    total_likes = Like.objects.filter(suggestion__user=request.user).count()
+
+    # 当月の提案数を取得
+    now = timezone.now()
+    monthly_proposals = Suggestion.objects.filter(user=request.user, created_at__year=now.year, created_at__month=now.month).count()
+
+    # 当月のいいね数を取得
+    monthly_likes = Like.objects.filter(suggestion__user=request.user, created_at__year=now.year, created_at__month=now.month).count()
+
+    return render(request, 'suggestions/dashboard.html', {
+        'total_proposals': total_proposals,
+        'total_likes': total_likes,
+        'monthly_proposals': monthly_proposals,
+        'monthly_likes': monthly_likes,  # 新たに追加
+    })
+
+
+
+@login_required
+def get_monthly_proposals(request):
+    # Group by month and count the suggestions
+    data = (
+        Suggestion.objects
+        .annotate(month=TruncMonth('created_at'))  # Extract the month
+        .values('month')  # Group by the month
+        .annotate(count=Count('id'))  # Count the suggestions
+        .order_by('month')  # Order by the month
+    )
+
+    # Convert the QuerySet to a list of dictionaries
+    data_list = list(data)
+
+    # Return the data as JSON
+    return JsonResponse(data_list, safe=False)
+
+
+
+class FetchData(View):
+    def get(self, request, *args, **kwargs):
+        # Suggestionモデルのインスタンスを作成日の昇順で取得
+        suggestions = Suggestion.objects.order_by('created_at')
+
+        # データを整形
+        data = [
+            {
+                "created_at": timezone.localtime(suggestion.created_at).isoformat(),
+                "content": suggestion.content
+            }
+            for suggestion in suggestions
+        ]
+
+        # データをJSONとしてレスポンス
+        return JsonResponse(data, safe=False)
+
+
+
+@login_required
+def get_weekly_proposals(request):
+    # Group by week and count the suggestions
+    data = (
+        Suggestion.objects
+        .annotate(week=TruncWeek('created_at'))  # Extract the week
+        .values('week')  # Group by the week
+        .annotate(count=Count('id'))  # Count the suggestions
+        .order_by('week')  # Order by the week
+    )
+
+    # Convert the QuerySet to a list of dictionaries
+    data_list = list(data)
+
+    # Return the data as JSON
+    return JsonResponse(data_list, safe=False)
