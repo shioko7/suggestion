@@ -1,22 +1,23 @@
-  {% load static %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css">
     <title>Suggestion Box</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     {% block head_extra %}{% endblock %}
 </head>
 <body>
-
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="{% url 'dashboard' %}">Dashboard</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <a href="{% url 'month_dashboard' year=now_year month=now_month %}" class="nav-link px-2 text-white">
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -40,8 +41,8 @@
           {% if user.is_authenticated %}
           <!-- User Info -->
           <div class="d-flex align-items-center ms-auto">
-              <a href="{% url 'dashboard' %}" class="nav-link px-2 text-white">
-                <img class="rounded-circle mr-2" src="{% if request.user.profile.profile_picture %}{{ request.user.profile.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" alt="{{ request.user.username }}" style="width: 40px; height: 40px;">
+            <a href="{% url 'month_dashboard' year=now_year month=now_month %}" class="nav-link px-2 text-white">
+    <img class="rounded-circle mr-2" src="{% if request.user.profile.profile_picture %}{{ request.user.profile.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" alt="{{ request.user.username }}" style="width: 40px; height: 40px;">
                 <span>{{ request.user.username }}</span>
               </a>
           </div>
@@ -49,14 +50,13 @@
       </div>
   </nav>
 
-
   <div class="container mt-4">
     {% block content %}{% endblock %}
   </div>
 
+
   <!-- hamburger.js読み込み -->
   {% block extrajs %}{% endblock %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script>
     $(document).ready(function() {
       $('.navbar-toggler').on('click', function() {
@@ -64,6 +64,5 @@
       });
     });
   </script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.1/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

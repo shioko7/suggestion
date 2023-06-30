@@ -1,69 +1,63 @@
 {% extends "suggestions/base.html" %}
 {% load static %}
-{% block content %}
+{% block head_extra %}
 
-<!-- Add this wherever you want your chart to appear in the body -->
+{% endblock %}
+{% block content %}
+<div class="month-pager">
+  <a href="{% url 'month_dashboard' prev_year prev_month %}">
+    前月
+  </a>
+  <span class="ml-4 mr-4">{{ now_year }}年{{ now_month }}月</span>
+  <a href="{% url 'month_dashboard' next_year next_month %}">
+    次月
+  </a>
+</div>
 <div>
-  <button id="weeklyBtn">Weekly</button>
-  <button id="monthlyBtn">Monthly</button>
-  <canvas id="myChart"></canvas>
+  <!-- 描画領域 -->
+  <canvas id="lineChart"></canvas>
 </div>
 
-<!-- Add this script to the bottom of your body -->
-<script>
-  var ctx = document.getElementById('myChart').getContext('2d');
-  var chart = new Chart(ctx, {
-    type: 'line',
-    data: {},
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day'
-          }
-        },
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-
-  function fetchData(url) {
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      const labels = data.map(item => item.week || item.month);
-      const counts = data.map(item => item.count);
-
-      chart.data.labels = labels;
-      chart.data.datasets = [
-        {
-          label: 'Number of proposals',
-          data: counts,
-          fill: false,
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.1,
-        },
-      ];
-      chart.update();
-    });
-}
-
-
-document.getElementById('weeklyBtn').addEventListener('click', function() {
-  fetchData("/get_weekly_proposals/");
-});
-
-document.getElementById('monthlyBtn').addEventListener('click', function() {
-  fetchData("/get_monthly_proposals/");
-});
-
-// Fetch initial data
-fetchData("/get_weekly_proposals/");
-
+<!-- コピーしたScriptタグを貼り付け -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js"
+integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q=="
+crossorigin="anonymous"
+referrerpolicy="no-referrer">
 </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const lineChartCtx = document.getElementById('lineChart').getContext('2d');
+    // X軸データ
+    const lineChartLabels = [
+      {% for day in days %}
+      '{{ day }}',
+      {% endfor %}
+    ];
+
+    const lineChartData = {
+      labels: lineChartLabels,
+      datasets: [{
+        label: '提案数', // ラベルを'提案数'に設定
+        backgroundColor: 'rgb(255, 99, 132)',
+        borderColor: 'rgb(255, 99, 132)',
+        lineTension: 0.3,
+        // Y軸データ
+        data: [
+          {% for suggestion in suggestions %}
+          {{ suggestion }},  // ループ変数名が間違っていたので修正
+          {% endfor %}
+        ],
+      }]
+    };
+
+    const lineChart = new Chart(lineChartCtx, {
+      type: 'line',
+      data: lineChartData,
+    });
+  });
+</script>
+
 
 <div class="container mt-4">
   <div class="row">

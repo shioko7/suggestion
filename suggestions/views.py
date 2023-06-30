@@ -13,6 +13,16 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views import View
 from django.db.models.functions import TruncWeek
+from django_pandas.io import read_frame
+import pandas as pd
+from django.views import generic
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
+
+
+
+
 
 
 def index(request):
@@ -165,24 +175,70 @@ def message_thread(request, sender_id, recipient_id):
     messages = Message.objects.filter(Q(sender=sender, recipient=recipient) | Q(sender=recipient, recipient=sender))
     return render(request, 'suggestions/message_thread.html', {'form': form, 'messages': messages})
 
-@login_required
-def dashboard(request):
-    total_proposals = Suggestion.objects.filter(user=request.user).count()
-    total_likes = Like.objects.filter(suggestion__user=request.user).count()
 
-    # 当月の提案数を取得
-    now = timezone.now()
-    monthly_proposals = Suggestion.objects.filter(user=request.user, created_at__year=now.year, created_at__month=now.month).count()
 
-    # 当月のいいね数を取得
-    monthly_likes = Like.objects.filter(suggestion__user=request.user, created_at__year=now.year, created_at__month=now.month).count()
+class MonthDashboard(LoginRequiredMixin, generic.TemplateView):
 
-    return render(request, 'suggestions/dashboard.html', {
-        'total_proposals': total_proposals,
-        'total_likes': total_likes,
-        'monthly_proposals': monthly_proposals,
-        'monthly_likes': monthly_likes,  # 新たに追加
-    })
+    """月間提案ダッシュボード"""
+    template_name = 'suggestions/dashboard.html'
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # これから表示する年月
+        year = int(self.kwargs.get('year'))
+        month = int(self.kwargs.get('month'))
+        context['now_year'] = year
+        context['now_month'] = month
+
+        total_proposals = Suggestion.objects.filter(user=self.request.user).count()
+        total_likes = Like.objects.filter(suggestion__user=self.request.user).count()
+
+        # 当月の提案数を取得
+        monthly_proposals = Suggestion.objects.filter(user=self.request.user, created_at__year=year, created_at__month=month).count()
+
+        # 当月のいいね数を取得
+        monthly_likes = Like.objects.filter(suggestion__user=self.request.user, created_at__year=year, created_at__month=month).count()
+
+        # 今月の提案の日付ごとの件数を取得
+        suggestion_queryset = Suggestion.objects.filter(created_at__year=year, created_at__month=month)
+        df_line = read_frame(suggestion_queryset, fieldnames=['created_at'])
+        df_line['created_at'] = pd.to_datetime(df_line['created_at'])
+        df_line['day'] = df_line['created_at'].dt.strftime('%Y-%m-%d')
+        df_line = df_line.groupby('day').size()
+        days = [day for day in df_line.index.values]
+        daily_suggestions = [val for val in df_line.values]
+
+        # 前月と次月をコンテキストに入れて渡す
+        if month == 1:
+            prev_year = year - 1
+            prev_month = 12
+        else:
+            prev_year = year
+            prev_month = month - 1
+
+        if month == 12:
+            next_year = year + 1
+            next_month = 1
+        else:
+            next_year = year
+            next_month = month + 1
+
+        context.update({
+            'total_proposals': total_proposals,
+            'total_likes': total_likes,
+            'monthly_proposals': monthly_proposals,
+            'monthly_likes': monthly_likes,
+            'days': days,
+            'suggestions': daily_suggestions,
+            'prev_year': prev_year,
+            'prev_month': prev_month,
+            'next_year': next_year,
+            'next_month': next_month
+        })
+
+        return context
 
 
 

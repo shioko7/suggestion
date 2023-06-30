@@ -21,11 +21,9 @@ urlpatterns = [
     path('messages/new/<int:recipient_id>/', views.message_create, name='message_create'),
     path('like_suggestion/', views.like_suggestion, name='like_suggestion'),  # like_suggestionビューへのURLを追加
     path('messages/thread/<int:sender_id>/<int:recipient_id>/', views.message_thread, name='message_thread'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/<int:year>/<int:month>/', views.MonthDashboard.as_view(), name='month_dashboard'),
     path('get-monthly-proposals/', views.get_monthly_proposals, name='get_monthly_proposals'),
     path('fetch-data', views.FetchData.as_view(), name='fetch_data'),
-    path('get-weekly-proposals/', views.get_weekly_proposals, name='get_weekly_proposals'),
-
 
     ]
 
