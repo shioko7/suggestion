@@ -14,7 +14,7 @@ class SuggestionForm(forms.ModelForm):
         fields = ['content', 'category']
 
 
-class UserProfileForm(forms.ModelForm):
+class EditProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['department', 'skills', 'profile_text', 'profile_picture']

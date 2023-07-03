@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect,get_object_or_404
-from .models import Category, Suggestion, Like ,Message # Like を追加
-from .forms import SuggestionForm, UserProfileForm, MessageForm # UserProfileFormとMessageFormを追加
+from .models import Category, Suggestion, Like ,Message,Profile # Like を追加
+from .forms import SuggestionForm, EditProfileForm, MessageForm # UserProfileFormとMessageFormを追加
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse  # JsonResponseを追加
 from django.views.decorators.http import require_POST  # require_POSTを追加
@@ -22,6 +22,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 
+@login_required
+def profile(request):
+    return render(request, 'suggestions/edit_profile.html')
 
 
 
@@ -103,28 +106,20 @@ def suggestion_delete(request, suggestion_id):
     return render(request, 'suggestions/suggestion_delete.html', {'suggestion': suggestion})
 
 
-@login_required
-def profile(request):
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
-        if form.is_valid():
-            form.save()
-            return redirect('profile')
-    else:
-        form = UserProfileForm(instance=request.user.profile)
-    return render(request, 'suggestions/profile.html', {'form': form})
-
+from django.contrib import messages  # Import the messages framework
 
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        form = EditProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if form.is_valid():
             form.save()
-            return redirect('profile')
+            messages.success(request, "Profile updated successfully!")  # Add this line
+            return redirect('edit_profile')
     else:
-        form = UserProfileForm(instance=request.user.profile)
+        form = EditProfileForm(instance=request.user.profile)
     return render(request, 'suggestions/edit_profile.html', {'form': form})
+
 
 @login_required
 def message_create(request, recipient_id):
@@ -140,6 +135,7 @@ def message_create(request, recipient_id):
     else:
         form = MessageForm()
     return render(request, 'suggestions/message_create.html', {'form': form, 'recipient': recipient})
+
 
 @login_required
 def message_list(request):

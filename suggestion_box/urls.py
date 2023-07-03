@@ -12,8 +12,7 @@ urlpatterns = [
     path('list/', views.suggestion_list, name='suggestion_list'),
     path("admin/",admin.site.urls),
     path('suggestion/<int:suggestion_id>/', views.suggestion_detail, name='suggestion_detail'),
-    path('profile/', views.profile, name='profile'),
-    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
     path('logout/', LogoutView.as_view(next_page='index'), name='logout'),
     path('suggestions/<int:suggestion_id>/edit/', views.suggestion_edit, name='suggestion_edit'),
     path('suggestions/<int:suggestion_id>/delete/', views.suggestion_delete, name='suggestion_delete'),
@@ -24,6 +23,7 @@ urlpatterns = [
     path('dashboard/<int:year>/<int:month>/', views.MonthDashboard.as_view(), name='month_dashboard'),
     path('get-monthly-proposals/', views.get_monthly_proposals, name='get_monthly_proposals'),
     path('fetch-data', views.FetchData.as_view(), name='fetch_data'),
+
 
     ]
 
