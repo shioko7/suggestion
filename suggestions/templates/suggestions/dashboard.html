@@ -17,7 +17,6 @@
   <canvas id="lineChart"></canvas>
 </div>
 
-
 <!-- コピーしたScriptタグを貼り付け -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js"
 integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q=="
@@ -26,30 +25,30 @@ referrerpolicy="no-referrer">
 </script>
 
 <script>
-
   document.addEventListener('DOMContentLoaded', (event) => {
     const lineChartCtx = document.getElementById('lineChart').getContext('2d');
-    // X軸データ
+
     const lineChartLabels = [
       {% for day in days %}
-      '{{ day }}',
+      "{{ day }}",
       {% endfor %}
     ];
 
     const lineChartData = {
       labels: lineChartLabels,
-      datasets: [{
-        label: 'Suggestion Count', // ラベルを'Suggestion Count'に設定
-        backgroundColor: 'rgb(255, 99, 132)',
-        borderColor: 'rgb(255, 99, 132)',
-        lineTension: 0.3,
-        // Y軸データ
-        data: [
-          {% for suggestion in suggestions %}
-          {{ suggestion }},  // ループ変数名が間違っていたので修正
-          {% endfor %}
-        ],
-      }]
+      datasets: [
+        {
+            label: '日ごとの提案数（全社）',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            lineTension: 0.3,
+            data: [
+              {% for suggestion in suggestions %}
+              {{ suggestion }},
+              {% endfor %}
+            ],
+        },
+      ]
     };
 
     const lineChart = new Chart(lineChartCtx, {
@@ -58,16 +57,14 @@ referrerpolicy="no-referrer">
       options: {
         plugins: {
           legend: {
-            display: false,
+            display: true,
           },
         },
       },
     });
   });
-
-  // 月の提案数を表示
-
 </script>
+
 
 
 <div class="container mt-4">
@@ -76,7 +73,7 @@ referrerpolicy="no-referrer">
     <div class="col-md-6">
       <div class="card mb-4">
         <div class="card-header">
-          当月
+          当月({{current_user.username}}の)
         </div>
         <div class="card-body">
           <div class="row">
@@ -123,7 +120,7 @@ referrerpolicy="no-referrer">
     <div class="col-md-6">
       <div class="card mb-4">
         <div class="card-header">
-          累計
+          累計({{current_user.username}}の)
         </div>
         <div class="card-body">
           <div class="row">
@@ -167,40 +164,60 @@ referrerpolicy="no-referrer">
 
   </div>
 </div>
-
-
+<style>
+.avatar img {
+    border-radius: 50%;  /* 丸型にする */
+    height: 50px;        /* 高さを50pxに設定 */
+    width: 50px;         /* 幅を50pxに設定 */
+}
+</style>
 <div class="col-12 col-xxl-6 mb-4">
     <div class="card border-0 shadow">
         <div class="card-header border-bottom d-flex align-items-center justify-content-between">
-            <h2 class="fs-5 fw-bold mb-0">Team members</h2>
-            <a href="#" class="btn btn-sm btn-primary">See all</a>
+            <h2 class="fs-5 fw-bold mb-0">{{ department.name }}</h2>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  Select Department
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    {% for department in departments %}
+                    <li><a class="dropdown-item" href="{% url 'department_members' department.id %}">{{ department.name }}</a></li>
+                    {% endfor %}
+                </ul>
+              </div>
         </div>
         <div class="card-body">
             <ul class="list-group list-group-flush list my--3">
                 {% for member in team_members %}
                 <li class="list-group-item px-0">
                     <div class="row align-items-center">
-                    <div class="col-auto">
-                        <!-- Avatar -->
-                        <a href="#" class="avatar">
-                            <img class="rounded" alt="Image placeholder" src="{{ member.avatar }}">
-                        </a>
-                    </div>
-                    <div class="col-auto ms--2">
-                        <h4 class="h6 mb-0">
-                            <a href="#">{{ member.name }}</a>
-                        </h4>
-                        <div class="d-flex align-items-center">
-                            <div class="{{ member.status }} dot rounded-circle me-1"></div>
-                            <small>{{ member.online }}</small>
+                        <div class="col-auto">
+                            <!-- Avatar -->
+                            <a href="#" class="avatar">
+                               {% if member.profile.profile_picture %}
+                                <img alt="Image placeholder" src="{{ member.profile.profile_picture.url }}">
+                                {% else %}
+                                <img alt="Image placeholder" src="{% static 'images/default-profile.png' %}">
+                                {% endif %}
+
+                            </a>
                         </div>
-                    </div>
-                    <div class="col text-end">
-                        <a href="#" class="btn btn-sm btn-secondary d-inline-flex align-items-center">
-                            <svg class="icon icon-xxs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                            Invite
-                        </a>
-                    </div>
+                        <div class="col-auto ms--2">
+        <h4 class="h6 mb-0">
+            <a href="#">{{ member.username }}</a>
+        </h4>
+        <div class="d-flex align-items-center">
+            <div class="{% if member.profile.is_online %}online{% else %}offline{% endif %} dot rounded-circle me-1"></div>
+            <small>{% if member.profile.is_online %}Online{% else %}Offline{% endif %}</small>
+        </div>
+    </div>
+
+                        <div class="col text-end">
+                            <a href="#" class="btn btn-sm btn-secondary d-inline-flex align-items-center">
+                                <svg class="icon icon-xxs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                                Invite
+                            </a>
+                        </div>
                     </div>
                 </li>
                 {% endfor %}
@@ -208,6 +225,7 @@ referrerpolicy="no-referrer">
         </div>
     </div>
 </div>
+
 
 
 

@@ -7,7 +7,7 @@
     <!-- ここを変更 -->
     <a href="{% url 'message_thread' sender_id=request.user.id recipient_id=suggestion.user.id %}">このユーザーにメッセージを送る</a>
 
-    <a href="{% url 'suggestion_list' %}">戻る</a>
+    <a href="{% url 'suggestion_list' year=now_year month=now_month  %}">戻る</a>
     {% if user == suggestion.user %}
     <a href="{% url 'suggestion_edit' suggestion.id %}">編集</a>
     <a href="{% url 'suggestion_delete' suggestion.id %}">削除</a>

@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+from datetime import timedelta
+
 
 
 class Department(models.Model):
@@ -48,13 +51,15 @@ class Category(models.Model):
         return self.get_name_display()
 
 class Suggestion(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # 追加
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) # 費用
+    expected_revenue = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) # 期待収益
+
     def num_likes(self):
         return self.like_set.count()
-
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

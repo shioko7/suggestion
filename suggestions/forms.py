@@ -7,11 +7,9 @@ class MessageForm(forms.ModelForm):  # 新しい MessageForm クラス
         fields = ['content']  # sender と recipient はビューで設定します
 
 class SuggestionForm(forms.ModelForm):
-    category = forms.ModelChoiceField(queryset=Category.objects.all())
-
     class Meta:
         model = Suggestion
-        fields = ['content', 'category']
+        fields = ['content', 'category', 'cost', 'expected_revenue'] # コストと期待収益のフィールドを追加
 
 
 class EditProfileForm(forms.ModelForm):

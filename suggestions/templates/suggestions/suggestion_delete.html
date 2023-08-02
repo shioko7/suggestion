@@ -6,6 +6,6 @@
     <form method="POST">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">削除</button>
-        <a href="{% url 'suggestion_list' %}" class="btn btn-secondary">キャンセル</a>
+        <a href="{% url 'suggestion_list' year=now_year month=now_month  %}" class="btn btn-secondary">キャンセル</a>
     </form>
 {% endblock %}

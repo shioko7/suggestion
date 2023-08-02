@@ -9,7 +9,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='suggestions/login.html'), name='login'),
     path('', views.index, name='index'),
     path('create/', views.suggestion_create, name='suggestion_create'),
-    path('list/', views.suggestion_list, name='suggestion_list'),
+    path('list/<int:year>/<int:month>/', views.suggestion_list, name='suggestion_list'),
     path("admin/",admin.site.urls),
     path('suggestion/<int:suggestion_id>/', views.suggestion_detail, name='suggestion_detail'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),

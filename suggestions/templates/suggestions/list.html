@@ -2,14 +2,14 @@
 
 {% block head_extra %}
 <style>
-    .factory { background-color: rgba(227, 74, 74, 0.3); }  /* 工場への提案 */
-    .administration { background-color: rgba(118, 227, 111, 0.3); }  /* 一般管理部門への提案 */
-    .regulations { background-color: rgba(74, 111, 227, 0.3); }  /* 規則への提案 */
-    .technology { background-color: rgba(227, 74, 227, 0.3); }  /* 技術本部への提案 */
-    .sales { background-color: rgba(74, 227, 227, 0.3); }  /* 営業への提案 */
+    .factory { background-color: rgba(153, 153, 153, 0.8); }  /* 工場への提案 */
+    .administration { background-color: rgba(102, 153, 102, 0.8); }  /* 一般管理部門への提案 */
+    .regulations { background-color: rgba(102, 102, 153, 0.8); }  /* 規則への提案 */
+    .technology { background-color: rgba(153, 102, 153, 0.8); }  /* 技術本部への提案 */
+    .sales { background-color: rgba(102, 153, 153, 0.8); }  /* 営業への提案 */
 
     .card-body {
-        height: 140px;  /* カードボディの高さを300pxに固定 */
+        height: 140px;  /* カードボディの高さを固定 */
     }
 
     .card-title {
@@ -20,63 +20,131 @@
 </style>
 {% endblock %}
 
-
 {% block content %}
-    <h1 class="mb-4">提案一覧</h1>
-    <div class="row row-cols-1 row-cols-md-4 g-6">
-        {% for suggestion in suggestions %}
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a href="{% url 'suggestion_detail' suggestion.id %}" class="text-decoration-none text-dark">
-                                {{ suggestion.content }}
+{% load humanize %}
 
-                        </h5>
+<div class="month-pager">
+  <a href="{% url 'suggestion_list' prev_year prev_month %}">
+
+    前月
+  </a>
+  <span class="ml-4 mr-4">{{ now_year }}年{{ now_month }}月</span>
+  <a href="{% url 'suggestion_list' next_year next_month %}">
+
+    次月
+  </a>
+</div>
+
+
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <h1 class="mb-4">Suggestion Ranking</h1>
+            <ul class="list-group">
+              {% for suggestion in suggestion_ranking %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+              <span>{{ forloop.counter }}. </span>
+              <a href="{% url 'suggestion_detail' suggestion.id %}">
+                  {{ suggestion.content }}
+              </a>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-heart"></i>
+            <span id="like_count-{{ suggestion.id }}">{{ suggestion.like_set.count }}</span>
+          </div>
+      </li>
+  {% endfor %}
+
+            </ul>
+        </div>
+        <div class="col-md-6">
+        <h1 class="mb-4">User Ranking</h1>
+        <ul class="list-group">
+            {% for user in user_ranking %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        {{ forloop.counter }}. {{ user.username }}
                     </div>
-                    <div class="card-footer {{ suggestion.category.name }}">
-                        <small class="text-muted">{{ suggestion.created_at }}</small>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ suggestion.category }}</h6>
-                        </a>
-
-                        <button type="button" class="like-button" data-suggestion-id="{{ suggestion.id }}" style="border:none;background:none">
-                          <i class="fa-heart {% if user in suggestion.likes.all %}fas text-danger{% else %}far{% endif %}" id="icon-{{ suggestion.id }}" style="opacity: 0.8;"></i>
-      <span id="like_count-{{ suggestion.id }}">{{ suggestion.like_set.count }} </span>
+                    <div class="d-flex align-items-center">
+                        <button type="button" class="like-button" data-user-id="{{ user.id }}" style="border:none;background:none">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path id="icon-{{ user.id }}" d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z"/></svg>
                         </button>
+                        <span>{{ user.suggestion_count }}</span>
                     </div>
-                </div>
-            </div>
-        {% endfor %}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
-{% endblock %}
 
-{% block extrajs %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  $('.like-button').on('click', function () {
-      var button = $(this);
-      var suggestionId = button.data('suggestion-id');
-      var icon = $('#icon-' + suggestionId);
-      var counter = $('#like_count-' + suggestionId);
-      $.ajax({
-          url: '{% url "like_suggestion" %}',
-          method: 'POST',
-          data: {
-              csrfmiddlewaretoken: '{{ csrf_token }}',
-              post_pk: suggestionId,
-          },
-          success: function (data) {
-              counter.text(data.like_count);
-              if (data.method == 'create'){
-                  icon.removeClass('far');
-                  icon.addClass('fas text-danger');
-              } else {
-                  icon.removeClass('fas text-danger');
-                  icon.addClass('far');
-              }
-          }
-      });
-  });
+  </div>
+  <h1 class="mb-4 mt-4">{{ now_year }}年　新着提案一覧</h1>
+  <div class="row row-cols-1 row-cols-md-4 g-6">
+  {% for suggestion in suggestions %}
+      <div class="col mt-2 mb-2">
+          <div class="card h-100">
+              <div class="card-body {{ suggestion.category.name }}">
+                  <h5 class="card-title">
+                      <a href="{% url 'suggestion_detail' suggestion.id %}" class="text-decoration-none text-light">
+                          {{ suggestion.content }}
+                      </a>
+                  </h5>
+              </div>
+              <div class="card-footer bg-white">
+                  <small class="text-muted">{{ suggestion.created_at }}</small>
+                  <h6 class="card-subtitle mb-2 text-muted">{{ suggestion.category }}</h6>
+                  <p class="text-muted">利益: ￥{{ suggestion.expected_profit|default:"未設定"|floatformat:0|intcomma }}</p>
 
-</script>
-{% endblock %}
+                  <button type="button" class="like-button" data-suggestion-id="{{ suggestion.id }}" style="border:none;background:none">
+                      <i class="fa-heart {% if suggestion.id in user_likes %}fas text-danger{% else %}far{% endif %}" id="icon-{{ suggestion.id }}" style="opacity: 0.8;"></i>
+                      <span id="like_count-{{ suggestion.id }}">{{ suggestion.like_set.count }}</span>
+                  </button>
+                  <!-- 利益を表示 -->
+                              </div>
+          </div>
+      </div>
+  {% endfor %}
+  </div>
+
+
+    {% endblock %}
+
+    {% block extrajs %}
+  <script>
+    $(document).ready(function() {
+        $('.like-button').on('click', function () {
+            var button = $(this);
+            var suggestionId = button.data('suggestion-id');
+
+            // suggestionIdが存在しない場合は何もしない
+            if (!suggestionId) return;
+
+            var icon = $('#icon-' + suggestionId);
+            var counter = $('.like-button[data-suggestion-id="' + suggestionId + '"]').find('span');
+
+            $.ajax({
+                url: '{% url "like_suggestion" %}',
+                method: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    post_pk: suggestionId,
+                },
+                success: function (data) {
+                    console.log(data);
+                    counter.text(data.like_count);
+                    if (data.method == 'create'){
+                        icon.removeClass('far');
+                        icon.addClass('fas');
+                        icon.addClass('text-danger');
+                    } else {
+                        icon.removeClass('fas');
+                        icon.removeClass('text-danger');
+                        icon.addClass('far');
+                    }
+                }
+            });
+        });
+    });
+  </script>
+  {% endblock %}

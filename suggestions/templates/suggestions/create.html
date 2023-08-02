@@ -1,6 +1,5 @@
 {% extends 'suggestions/base.html' %}
 
-
 {% block content %}
 <div class="container mt-5">
   <div class="row justify-content-center">
@@ -20,6 +19,15 @@
             {% endfor %}
           </select>
         </div>
+        <div class="mb-3">
+          <label for="cost" class="form-label">コスト</label>
+          <input type="number" class="form-control" id="cost" name="cost">
+        </div>
+        <div class="mb-3">
+          <label for="expected_revenue" class="form-label">期待収益</label>
+          <input type="number" class="form-control" id="expected_revenue" name="expected_revenue">
+        </div>
+
         <button type="submit" class="btn btn-primary">提案する</button>
       </form>
     </div>
