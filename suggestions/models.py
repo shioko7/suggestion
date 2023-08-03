@@ -53,13 +53,32 @@ class Category(models.Model):
 class Suggestion(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
+    business_details = models.TextField(null=True, blank=True) # 事業内容の詳細
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) # 費用
-    expected_revenue = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) # 期待収益
+    business_start_date = models.DateField(null=True, blank=True) # 事業スタート日付
+    fixed_asset_investment_year1 = models.BigIntegerField(null=True, blank=True) # 1年目固定資産投資金額
+    non_fixed_asset_investment_year1 = models.BigIntegerField(null=True, blank=True) # 1年目固定資産以外投資金額
+    depreciation_year1 = models.BigIntegerField(null=True, blank=True) # 1年目減価償却費
+    other_expenses_year1 = models.BigIntegerField(null=True, blank=True) # 1年目その他費用
+    revenue_year1 = models.BigIntegerField(null=True, blank=True) # 1年目収益
+    fixed_asset_investment_year2 = models.BigIntegerField(null=True, blank=True) # 2年目固定資産投資金額
+    non_fixed_asset_investment_year2 = models.BigIntegerField(null=True, blank=True) # 2年目固定資産以外投資金額
+    depreciation_year2 = models.BigIntegerField(null=True, blank=True) # 2年目減価償却費
+    other_expenses_year2 = models.BigIntegerField(null=True, blank=True) # 2年目その他費用
+    revenue_year2 = models.BigIntegerField(null=True, blank=True) # 2年目収益
+    fixed_asset_investment_year3 = models.BigIntegerField(null=True, blank=True) # 3年目固定資産投資金額
+    non_fixed_asset_investment_year3 = models.BigIntegerField(null=True, blank=True) # 3年目固定資産以外投資金額
+    depreciation_year3 = models.BigIntegerField(null=True, blank=True) # 3年目減価償却費
+    other_expenses_year3 = models.BigIntegerField(null=True, blank=True) # 3年目その他費用
+    revenue_year3 = models.BigIntegerField(null=True, blank=True) # 3年目収益
+    # その他のフィールド
+    disposal_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) # 事業終了時売却金額
+    yield_rate = models.DecimalField(max_digits=3, decimal_places=1, default=1.0, null=True, blank=True) # 利回り
 
     def num_likes(self):
         return self.like_set.count()
+
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

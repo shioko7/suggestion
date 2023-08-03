@@ -71,11 +71,7 @@ def suggestion_list(request, year, month):
     end_date = timezone.make_aware(timezone.datetime(year=year + 1, month=1, day=1))
 
     suggestions = Suggestion.objects.filter(created_at__range=(start_date, end_date)).order_by('-created_at')
-    for suggestion in suggestions:
-        if suggestion.expected_revenue is None or suggestion.cost is None:
-            suggestion.expected_profit = None
-        else:
-            suggestion.expected_profit = suggestion.expected_revenue - suggestion.cost
+
 
     suggestion_ranking = get_suggestion_ranking()
     user_ranking = get_user_ranking()
@@ -116,9 +112,48 @@ def like_suggestion(request):
 
 @login_required
 def suggestion_detail(request, suggestion_id):
-    suggestion = get_object_or_404(Suggestion, id=suggestion_id)
-    return render(request, 'suggestions/suggestion_detail.html', {'suggestion': suggestion})
+    suggestion = get_object_or_404(Suggestion, pk=suggestion_id)
 
+
+    yield_rate = float(suggestion.yield_rate) / 100# 1年目、2年目、3年目の投資額①を計算
+    investment_amounts = [
+        float(suggestion.fixed_asset_investment_year1) + float(suggestion.non_fixed_asset_investment_year1),
+        float(suggestion.fixed_asset_investment_year2) + float(suggestion.non_fixed_asset_investment_year2),
+        float(suggestion.fixed_asset_investment_year3) + float(suggestion.non_fixed_asset_investment_year3),
+        ]
+
+# 1年目、2年目、3年目のCFを計算
+    cf_values = [
+        (float(suggestion.revenue_year1) - float(suggestion.depreciation_year1) - float(suggestion.other_expenses_year1)) * 0.6 + float(suggestion.depreciation_year1),
+        (float(suggestion.revenue_year2) - float(suggestion.depreciation_year2) - float(suggestion.other_expenses_year2)) * 0.6 + float(suggestion.depreciation_year2),
+        (float(suggestion.revenue_year3) - float(suggestion.depreciation_year3) - float(suggestion.other_expenses_year3)) * 0.6 + float(suggestion.depreciation_year3),
+        ]
+
+#
+
+# 1年目、2年目、3年目のPVを計算
+    pv_values = [
+        (cf_values[0] + float(suggestion.disposal_amount) - investment_amounts[0]) * (1 / (1 + yield_rate)),
+        (cf_values[1] + float(suggestion.disposal_amount) - investment_amounts[1]) * (1 / ((1 + yield_rate) ** 2)),
+        (cf_values[2] + float(suggestion.disposal_amount) - investment_amounts[2]) * (1 / ((1 + yield_rate) ** 3)),
+        ]
+
+    # NPVを計算
+    npv = sum(pv_values)
+
+    # 現価係数
+    discount_factors = [1 / (1 + yield_rate) ** i for i in range(1, 4)]
+
+    context = {
+        'suggestion': suggestion,
+        'investment_amounts': investment_amounts,
+        'cf_values': cf_values,
+        'discount_factors': discount_factors,
+        'pv_values': pv_values,
+        'npv': npv,
+    }
+
+    return render(request, 'suggestions/suggestion_detail.html', context)
 
 def home(request):
     if request.user.is_authenticated:
@@ -139,11 +174,10 @@ def suggestion_create(request):
             suggestion = form.save(commit=False)
             suggestion.user = request.user
             suggestion.save()
-            return redirect('suggestion_list', year=now_year ,month=now_month)
+            return redirect('suggestion_list', year=now_year, month=now_month)
     else:
         form = SuggestionForm()
     return render(request, 'suggestions/create.html', {'form': form, 'categories': categories})
-
 
 
 

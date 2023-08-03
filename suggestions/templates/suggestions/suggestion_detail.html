@@ -1,17 +1,192 @@
 {% extends 'suggestions/base.html' %}
-
+{% load humanize %}
 {% block content %}
-    <h1>{{ suggestion.category }}</h1>
-    <p>{{ suggestion.content }}</p>
-    <p><small>投稿日: {{ suggestion.created_at }}</small></p>
-    <!-- ここを変更 -->
-    <a href="{% url 'message_thread' sender_id=request.user.id recipient_id=suggestion.user.id %}">このユーザーにメッセージを送る</a>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <h2 class="mb-4">提案詳細</h2>
+      <div class="card mb-4">
+        <div class="card-body">
+          <p><strong>提案内容:</strong> {{ suggestion.content }}</p>
+          <p><strong>事業内容の詳細:</strong> {{ suggestion.business_details }}</p>
+          <p><strong>カテゴリー:</strong> {{ suggestion.category.name }}</p>
+          <p><strong>事業スタート日付:</strong> {{ suggestion.business_start_date }}</p>
+        </div>
+      </div>
 
-    <a href="{% url 'suggestion_list' year=now_year month=now_month  %}">戻る</a>
-    {% if user == suggestion.user %}
-    <a href="{% url 'suggestion_edit' suggestion.id %}">編集</a>
-    <a href="{% url 'suggestion_delete' suggestion.id %}">削除</a>
+    </div>
+    <div class="col-lg-6">
+    <div>
+  <canvas id="barChart"></canvas>
+</div>
+<!-- コピーしたScriptタグを貼り付け -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js"
+integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q=="
+crossorigin="anonymous"
+referrerpolicy="no-referrer">
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const barChartCtx = document.getElementById('barChart').getContext('2d');
 
-    {% endif %}
+    const barChartLabels = [
+      "NPV",
+      "1年目",
+      "2年目",
+      "3年目",
+    ];
+
+    const dataValues = [
+      {{ npv }},
+      {{ pv_values.0 }},
+      {{ pv_values.1 }},
+      {{ pv_values.2 }},
+    ];
+
+    // 色の設定
+    const barChartColors = dataValues.map(value => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(75, 192, 192)');
+
+    const barChartData = {
+      labels: barChartLabels,
+      datasets: [
+        {
+            label: '投資評価（DCF法）',
+            backgroundColor: barChartColors,
+            borderColor: barChartColors,
+            data: dataValues,
+        },
+      ]
+    };
+
+    const barChart = new Chart(barChartCtx, {
+      type: 'bar',
+      data: barChartData,
+      options: {
+        plugins: {
+          legend: {
+            display: true,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+          }
+        }
+      },
+    });
+  });
+</script>
+</div>
+    </div>
+    <div class="row">
+<div class="alert alert-info">
+<p>あなたの投資計画が生み出す合計キャッシュフローは<strong>{{ npv|floatformat:0|intcomma }}円</strong>です。</p>
+<p> 生み出すキャッシュが       {% if npv > 0 %}
+    <span class="text-success">プラスのため、当計画は投資すべき</span>
+  {% else %}
+    <span class="text-danger">マイナスのため、当計画は考慮すべき</span>
+  {% endif %}
+  と言えます。</p>
+</div>
+
+      <table class="table table-bordered table-striped">
+        <thead class="table-light">
+          <tr>
+            <td>投資額①</td>
+            <td>{{ investment_amounts.0|floatformat:0|intcomma }}</td>
+            <td>{{ investment_amounts.1|floatformat:0|intcomma }}</td>
+            <td>{{ investment_amounts.2|floatformat:0|intcomma }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CF②</td>
+            <td>{{ cf_values.0|floatformat:0|intcomma }}</td>
+            <td>{{ cf_values.1|floatformat:0|intcomma }}</td>
+            <td>{{ cf_values.2|floatformat:0|intcomma }}</td>
+          </tr>
+          <tr>
+            <td>現価係数利回り③</td>
+            <td>{{ discount_factors.0|floatformat:0|intcomma }}%</td>
+            <td>{{ discount_factors.1|floatformat:0|intcomma }}%</td>
+            <td>{{ discount_factors.2|floatformat:0|intcomma }}%</td>
+          </tr>
+          <tr>
+            <td>PV（②‐①）*③</td>
+            <td>{{ pv_values.0|floatformat:0|intcomma }}</td>
+            <td>{{ pv_values.1|floatformat:0|intcomma }}</td>
+            <td>{{ pv_values.2|floatformat:0|intcomma }}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+
+</div>
+</div>
+
+<div class="container mt-5 mb-5">
+<div class="row">
+
+    <div class="col-lg-4">
+      <!-- 1年目 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3>1年目</h3>
+        </div>
+        <div class="card-body">
+          <p><strong>固定資産投資金額:</strong> {{ suggestion.fixed_asset_investment_year1|intcomma }}</p>
+          <p><strong>固定資産以外投資金額:</strong> {{ suggestion.non_fixed_asset_investment_year1|intcomma }}</p>
+          <p><strong>減価償却費:</strong> {{ suggestion.depreciation_year1|intcomma }}</p>
+          <p><strong>その他費用:</strong> {{ suggestion.other_expenses_year1|intcomma }}</p>
+          <p><strong>収益:</strong> {{ suggestion.revenue_year1|intcomma }}</p>
+        </div>
+      </div>
+      </div>
+          <div class="col-lg-4">
+      <!-- 2年目 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3>2年目</h3>
+        </div>
+        <div class="card-body">
+          <p><strong>固定資産投資金額:</strong> {{ suggestion.fixed_asset_investment_year2|intcomma }}</p>
+          <p><strong>固定資産以外投資金額:</strong> {{ suggestion.non_fixed_asset_investment_year2|intcomma }}</p>
+          <p><strong>減価償却費:</strong> {{ suggestion.depreciation_year2|intcomma }}</p>
+          <p><strong>その他費用:</strong> {{ suggestion.other_expenses_year2|intcomma }}</p>
+          <p><strong>収益:</strong> {{ suggestion.revenue_year2|intcomma }}</p>
+        </div>
+      </div>
+      </div>
+        <div class="col-lg-4">
+      <!-- 3年目 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3>3年目</h3>
+        </div>
+        <div class="card-body">
+          <p><strong>固定資産投資金額:</strong> {{ suggestion.fixed_asset_investment_year3|intcomma }}</p>
+          <p><strong>固定資産以外投資金額:</strong> {{ suggestion.non_fixed_asset_investment_year3|intcomma }}</p>
+          <p><strong>減価償却費:</strong> {{ suggestion.depreciation_year3|intcomma }}</p>
+          <p><strong>その他費用:</strong> {{ suggestion.other_expenses_year3|intcomma }}</p>
+          <p><strong>収益:</strong> {{ suggestion.revenue_year3|intcomma }}</p>
+        </div>
+      </div>
+      </div>
+      <p><strong>事業終了時売却金額:</strong> {{ suggestion.disposal_amount|intcomma }}</p>
+      <p><strong>想定利回り:</strong> {{ suggestion.yield_rate }}%</p>
+
+</div>
+                      <div class="row mt-10">
+                        <div class="col-lg-6">
+              <a href="{% url 'message_thread' sender_id=request.user.id recipient_id=suggestion.user.id %}" class="btn btn-primary">このユーザーにメッセージを送る</a>
+              <a href="{% url 'suggestion_list' year=now_year month=now_month  %}" class="btn btn-secondary">戻る</a>
+              {% if user == suggestion.user %}
+              <a href="{% url 'suggestion_edit' suggestion.id %}" class="btn btn-warning">編集</a>
+              <a href="{% url 'suggestion_delete' suggestion.id %}" class="btn btn-danger">削除</a>
+              {% endif %}
+</div>
+      </div>
+    </div>
 
 {% endblock %}

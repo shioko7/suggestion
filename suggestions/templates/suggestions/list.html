@@ -94,7 +94,6 @@
               <div class="card-footer bg-white">
                   <small class="text-muted">{{ suggestion.created_at }}</small>
                   <h6 class="card-subtitle mb-2 text-muted">{{ suggestion.category }}</h6>
-                  <p class="text-muted">利益: ￥{{ suggestion.expected_profit|default:"未設定"|floatformat:0|intcomma }}</p>
 
                   <button type="button" class="like-button" data-suggestion-id="{{ suggestion.id }}" style="border:none;background:none">
                       <i class="fa-heart {% if suggestion.id in user_likes %}fas text-danger{% else %}far{% endif %}" id="icon-{{ suggestion.id }}" style="opacity: 0.8;"></i>
