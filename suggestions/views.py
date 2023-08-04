@@ -10,6 +10,7 @@ from django.db.models import Count
 from django.db.models.functions import TruncDay,TruncMonth
 from datetime import datetime
 from django.utils import timezone
+from django.contrib import messages
 from django.http import JsonResponse
 from django.views import View
 from django.db.models.functions import TruncWeek
@@ -212,11 +213,11 @@ def edit_profile(request):
         form = EditProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if form.is_valid():
             form.save()
-            messages.success(request, "Profile updated successfully!")  # Add this line
+            messages.success(request, "Profile updated successfully!")
             return redirect('edit_profile')
     else:
         form = EditProfileForm(instance=request.user.profile)
-    return render(request, 'suggestions/edit_profile.html', {'form': form})
+    return render(request, 'suggestions/edit_profile.html', {'form': form, 'member': request.user})
 
 
 @login_required
